@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.googleServices)
 }
 
 android {
@@ -22,7 +23,26 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "env"
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "env_name", "DEV")
+            buildConfigField("String", "FIREBASE_DB", "\"(default)\"")
+        }
+        create("prod") {
+            dimension = "env"
+            resValue("string", "env_name", "PROD")
+            buildConfigField("String", "FIREBASE_DB", "\"(default)\"")
+        }
+    }
+
     buildTypes {
+        debug {
+            isDebuggable = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -40,6 +60,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -24,15 +26,75 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.roastkoff.controlposter.data.model.AuthState
+import com.roastkoff.controlposter.ui.auth.AuthViewModel
+import com.roastkoff.controlposter.ui.screen.authen.AuthGateScreen
 import com.roastkoff.controlposter.ui.screen.dashboard.DashboardScreen
+import com.roastkoff.controlposter.ui.screen.login.LoginScreen
 
 @Composable
 fun ControlPosterNavigation(
     paddingValues: PaddingValues,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
+
+    NavHost(
+        navController = navController,
+        startDestination = Route.AUTH_GATE,
+        modifier = Modifier.padding(paddingValues)
+    ) {
+        composable(Route.AUTH_GATE) {
+            AuthGateScreen(
+                viewModel = authViewModel,
+                onAuthenticated = {
+                    navController.navigate(Route.MAIN) {
+                        popUpTo(Route.AUTH_GATE) { inclusive = true }
+                    }
+                },
+                onUnauthenticated = {
+                    navController.navigate(Route.LOGIN) {
+                        popUpTo(Route.AUTH_GATE) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Route.LOGIN) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Route.AUTH_GATE) {
+                        popUpTo(Route.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Route.MAIN) {
+            if (authState is AuthState.Authorized) {
+                MainNavigation(
+                    authViewModel = authViewModel,
+                    onSignOut = {
+                        authViewModel.signOut()
+                        navController.navigate(Route.LOGIN) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainNavigation(
+    authViewModel: AuthViewModel,
+    onSignOut: () -> Unit
+) {
+    val navController = rememberNavController()
+
     Scaffold(
-        modifier = Modifier.padding(paddingValues),
         bottomBar = {
             BottomNavigationBar(navController = navController)
         }
@@ -43,9 +105,7 @@ fun ControlPosterNavigation(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Dashboard.route) {
-                DashboardScreen(
-                    onSignOut = { /* Handle sign out */ }
-                )
+                DashboardScreen(onSignOut = onSignOut)
             }
 
             composable(Screen.Playlists.route) {
@@ -62,12 +122,6 @@ fun ControlPosterNavigation(
 
             composable(Screen.Settings.route) {
                 // SettingsScreen()
-            }
-
-            // Detail screens
-            composable("${Screen.PlaylistEditor.route}/{id}") { backStackEntry ->
-                val playlistId = backStackEntry.arguments?.getString("id")
-                // PlaylistEditorScreen(id = playlistId!!)
             }
         }
     }
@@ -105,7 +159,12 @@ private fun BottomNavigationBar(navController: NavHostController) {
     }
 }
 
-// Screen definitions
+object Route {
+    const val AUTH_GATE = "auth_gate"
+    const val LOGIN = "login"
+    const val MAIN = "main"
+}
+
 sealed class Screen(
     val route: String,
     val label: String,
@@ -117,7 +176,6 @@ sealed class Screen(
     data object Branches : Screen("branches", "Branches", Icons.Outlined.Store)
     data object Settings : Screen("settings", "Settings", Icons.Outlined.Settings)
 
-    // Detail screens
     data object PlaylistEditor :
         Screen("playlist/edit", "Edit Playlist", Icons.AutoMirrored.Outlined.List)
 }

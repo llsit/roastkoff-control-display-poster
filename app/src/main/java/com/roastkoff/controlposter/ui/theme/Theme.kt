@@ -2,42 +2,47 @@ package com.roastkoff.controlposter.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Primary80,
+    secondary = Secondary80,
+    tertiary = Accent80,
+    background = BackgroundDark,
+    surface = SurfaceDark,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onBackground = Color(0xFFE2E2E2),
+    onSurface = Color(0xFFDADADA)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = Primary40,
+    secondary = Secondary40,
+    tertiary = Accent40,
+    background = Color(0xFFFDFBFF),
+    surface = Color(0xFFFFFFFF),
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onTertiary = Color.White,
     onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onSurface = Color(0xFF1C1B1F)
 )
 
 @Composable
 fun ControlPosterTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = true, // force dark (fits dashboard feel)
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -50,9 +55,26 @@ fun ControlPosterTheme(
         else -> LightColorScheme
     }
 
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        val window = (view.context as? Activity)?.window
+        window?.let {
+            WindowCompat.getInsetsController(it, view)?.isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }
+
+val Shapes = Shapes(
+    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(4.dp),
+    small = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    medium = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+    large = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+    extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(28.dp)
+)
