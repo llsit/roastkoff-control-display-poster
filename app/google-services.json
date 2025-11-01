@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "106152096255",
+    "project_id": "roastkoffposter-dev",
+    "storage_bucket": "roastkoffposter-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:106152096255:android:34c9fa5ea6fe962ae8b7ca",
+        "android_client_info": {
+          "package_name": "com.roastkoff.controlposter.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxKLZ5Yj5I0uTMumF4QtUZkCDiS4xU5zA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:106152096255:android:b7d483f1f25999a1e8b7ca",
+        "android_client_info": {
+          "package_name": "com.roastkoff.displayposter.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxKLZ5Yj5I0uTMumF4QtUZkCDiS4xU5zA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
