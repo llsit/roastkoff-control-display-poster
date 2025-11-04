@@ -4,6 +4,8 @@ import com.roastkoff.controlposter.data.AuthRepository
 import com.roastkoff.controlposter.data.AuthRepositoryImpl
 import com.roastkoff.controlposter.data.DashRepository
 import com.roastkoff.controlposter.data.DashRepositoryImpl
+import com.roastkoff.controlposter.data.DisplayRepository
+import com.roastkoff.controlposter.data.DisplayRepositoryImpl
 import com.roastkoff.controlposter.data.GroupRepository
 import com.roastkoff.controlposter.data.GroupRepositoryImpl
 import com.roastkoff.controlposter.data.UserRepository
@@ -28,4 +30,7 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindDashRepositoryImpl(dashRepository: DashRepositoryImpl): DashRepository
+
+    @Binds
+    abstract fun bindDisplayRepositoryImpl(displayRepository: DisplayRepositoryImpl): DisplayRepository
 }

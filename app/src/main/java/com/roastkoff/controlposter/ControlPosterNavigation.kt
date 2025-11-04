@@ -16,6 +16,7 @@ import com.roastkoff.controlposter.data.model.AuthState
 import com.roastkoff.controlposter.ui.screen.authen.AuthGateScreen
 import com.roastkoff.controlposter.ui.screen.authen.AuthViewModel
 import com.roastkoff.controlposter.ui.screen.dashboard.DashboardScreen
+import com.roastkoff.controlposter.ui.screen.display.PairManualScreen
 import com.roastkoff.controlposter.ui.screen.group.AddGroupScreen
 import com.roastkoff.controlposter.ui.screen.login.LoginScreen
 
@@ -94,14 +95,22 @@ private fun MainNavigation(
                     onSignOut = onSignOut,
                     onTapDisplay = {},
                     onOpenAddBranch = { navController.navigate(MainRoute.AddGroup.path) },
-                    onOpenPairDisplay = {}
+                    onOpenPairDisplay = { navController.navigate(MainRoute.PairDisplay.path) }
                 )
             }
 
             composable(MainRoute.AddGroup.path) {
                 AddGroupScreen(
                     tenantId = currentTenantId,
-                    onSaved = {},
+                    onSaved = { navController.navigateUp() },
+                    onClickBack = { navController.navigateUp() }
+                )
+            }
+
+            composable(MainRoute.PairDisplay.path) {
+                PairManualScreen(
+                    tenantId = currentTenantId,
+                    onDone = {},
                     onClickBack = { navController.popBackStack() }
                 )
             }

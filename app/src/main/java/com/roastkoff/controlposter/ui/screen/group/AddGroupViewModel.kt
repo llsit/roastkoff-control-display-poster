@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class AddGroupUi(
@@ -21,7 +22,7 @@ class AddGroupViewModel @Inject constructor(
     private val repository: GroupRepository
 ) : ViewModel() {
     private val _addGroupUi = MutableStateFlow(AddGroupUi())
-    val addGroupUi: StateFlow<AddGroupUi> = _addGroupUi
+    val addGroupUi: StateFlow<AddGroupUi> = _addGroupUi.asStateFlow()
 
     fun setName(name: String) {
         _addGroupUi.value = _addGroupUi.value.copy(name = name, error = null)
