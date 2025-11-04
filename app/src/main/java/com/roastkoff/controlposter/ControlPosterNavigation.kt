@@ -92,15 +92,15 @@ private fun MainNavigation(
                 DashboardScreen(
                     tenantId = currentTenantId,
                     onSignOut = onSignOut,
-                    onNavigateToDisplays = {},
-                    onNavigateToPlaylists = {},
-                    onNavigateToBranches = { navController.navigate(MainRoute.AddBranch.path) }
+                    onTapDisplay = {},
+                    onOpenAddBranch = { navController.navigate(MainRoute.AddGroup.path) },
+                    onOpenPairDisplay = {}
                 )
             }
 
-            composable(MainRoute.AddBranch.path) {
+            composable(MainRoute.AddGroup.path) {
                 AddGroupScreen(
-                    currentTenantId,
+                    tenantId = currentTenantId,
                     onSaved = {},
                     onClickBack = { navController.popBackStack() }
                 )
@@ -117,6 +117,6 @@ object Route {
 
 sealed class MainRoute(val path: String) {
     data object Dashboard : MainRoute("dashboard")
-    data object AddBranch : MainRoute("add_branch")
+    data object AddGroup : MainRoute("add_group")
     data object PairDisplay : MainRoute("pair_display")
 }
