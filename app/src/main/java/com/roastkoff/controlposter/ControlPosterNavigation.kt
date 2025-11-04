@@ -13,10 +13,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.roastkoff.controlposter.data.model.AuthState
-import com.roastkoff.controlposter.ui.auth.AuthViewModel
 import com.roastkoff.controlposter.ui.screen.authen.AuthGateScreen
-import com.roastkoff.controlposter.ui.screen.branch.AddBranchScreen
+import com.roastkoff.controlposter.ui.screen.authen.AuthViewModel
 import com.roastkoff.controlposter.ui.screen.dashboard.DashboardScreen
+import com.roastkoff.controlposter.ui.screen.group.AddGroupScreen
 import com.roastkoff.controlposter.ui.screen.login.LoginScreen
 
 @Composable
@@ -82,7 +82,6 @@ private fun MainNavigation(
 ) {
     val navController = rememberNavController()
 
-
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
@@ -95,12 +94,16 @@ private fun MainNavigation(
                     onSignOut = onSignOut,
                     onNavigateToDisplays = {},
                     onNavigateToPlaylists = {},
-                    onNavigateToBranches = {}
+                    onNavigateToBranches = { navController.navigate(MainRoute.AddBranch.path) }
                 )
             }
 
             composable(MainRoute.AddBranch.path) {
-                AddBranchScreen(currentTenantId, onSaved = {})
+                AddGroupScreen(
+                    currentTenantId,
+                    onSaved = {},
+                    onClickBack = { navController.popBackStack() }
+                )
             }
         }
     }

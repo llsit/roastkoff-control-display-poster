@@ -1,5 +1,4 @@
-// AuthViewModel.kt
-package com.roastkoff.controlposter.ui.auth
+package com.roastkoff.controlposter.ui.screen.authen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

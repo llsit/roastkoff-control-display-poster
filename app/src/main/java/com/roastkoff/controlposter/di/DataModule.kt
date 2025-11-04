@@ -2,10 +2,10 @@ package com.roastkoff.controlposter.di
 
 import com.roastkoff.controlposter.data.AuthRepository
 import com.roastkoff.controlposter.data.AuthRepositoryImpl
-import com.roastkoff.controlposter.data.BranchRepository
-import com.roastkoff.controlposter.data.BranchRepositoryImpl
 import com.roastkoff.controlposter.data.DashRepository
 import com.roastkoff.controlposter.data.DashRepositoryImpl
+import com.roastkoff.controlposter.data.GroupRepository
+import com.roastkoff.controlposter.data.GroupRepositoryImpl
 import com.roastkoff.controlposter.data.UserRepository
 import com.roastkoff.controlposter.data.UserRepositoryImpl
 import dagger.Binds
@@ -24,7 +24,7 @@ abstract class DataModule {
     abstract fun bindUserRepository(userRepository: UserRepositoryImpl): UserRepository
 
     @Binds
-    abstract fun bindBranchRepository(branchRepository: BranchRepositoryImpl): BranchRepository
+    abstract fun bindBranchRepository(groupRepository: GroupRepositoryImpl): GroupRepository
 
     @Binds
     abstract fun bindDashRepositoryImpl(dashRepository: DashRepositoryImpl): DashRepository

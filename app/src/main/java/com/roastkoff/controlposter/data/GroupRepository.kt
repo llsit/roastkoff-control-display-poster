@@ -11,19 +11,18 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-interface BranchRepository {
-    suspend fun createBranch(tenantId: String, name: String, address: String?): String
-    fun branchesOfTenant(tenantId: String): Flow<List<Pair<String, BranchDto>>>
+interface GroupRepository {
+    suspend fun createGroup(tenantId: String, name: String): String
+    fun groupsOfTenant(tenantId: String): Flow<List<Pair<String, BranchDto>>>
 }
 
-class BranchRepositoryImpl @Inject constructor(
+class GroupRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
-) : BranchRepository {
+) : GroupRepository {
 
-    override suspend fun createBranch(
+    override suspend fun createGroup(
         tenantId: String,
         name: String,
-        address: String?
     ): String {
         require(tenantId.isNotBlank()) { "tenantId required" }
         require(name.isNotBlank()) { "name required" }
@@ -32,16 +31,15 @@ class BranchRepositoryImpl @Inject constructor(
         val data = mapOf(
             "tenantId" to tenantId,
             "name" to name,
-            "address" to address,
             "createdAt" to FieldValue.serverTimestamp()
         )
         document.set(data).await()
         return document.id
     }
 
-    override fun branchesOfTenant(tenantId: String): Flow<List<Pair<String, BranchDto>>> =
+    override fun groupsOfTenant(tenantId: String): Flow<List<Pair<String, BranchDto>>> =
         callbackFlow {
-            val reg = firestore.collection("branches")
+            val reg = firestore.collection("groups")
                 .whereEqualTo("tenantId", tenantId)
                 .orderBy("name", Query.Direction.ASCENDING)
                 .addSnapshotListener { snap, err ->

@@ -1,5 +1,6 @@
 package com.roastkoff.controlposter.data
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.roastkoff.controlposter.data.model.DashboardStats
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +16,11 @@ class DashRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : DashRepository {
     override fun branchesOfTenant(tenantId: String): Flow<DashboardStats> = flow {
+        Log.d("DEBUG",
+            "project=${firestore.app.options.projectId}, " +
+                    "tenantFromUserDoc=<โหลดจาก /users/{uid}>, " +
+                    "queryTenant=$tenantId"
+        )
         val displays = firestore.collection(COLLECTION_DISPLAYS)
             .whereEqualTo(FIELD_TENANT_ID, tenantId)
             .get()
@@ -25,7 +31,7 @@ class DashRepositoryImpl @Inject constructor(
             .get()
             .await()
 
-        val branches = firestore.collection(COLLECTION_BRANCHES)
+        val branches = firestore.collection(COLLECTION_GROUPS)
             .whereEqualTo(FIELD_TENANT_ID, tenantId)
             .get()
             .await()
@@ -47,7 +53,7 @@ class DashRepositoryImpl @Inject constructor(
     companion object {
         private const val COLLECTION_DISPLAYS = "displays"
         private const val COLLECTION_PLAYLISTS = "playlists"
-        private const val COLLECTION_BRANCHES = "branches"
+        private const val COLLECTION_GROUPS = "groups"
         private const val FIELD_TENANT_ID = "tenantId"
         private const val FIELD_STATUS = "status"
         private const val STATUS_ONLINE = "online"

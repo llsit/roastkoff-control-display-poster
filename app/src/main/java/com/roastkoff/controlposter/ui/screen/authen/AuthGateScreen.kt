@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.roastkoff.controlposter.data.model.AuthState
-import com.roastkoff.controlposter.ui.auth.AuthViewModel
 
 @Composable
 fun AuthGateScreen(
