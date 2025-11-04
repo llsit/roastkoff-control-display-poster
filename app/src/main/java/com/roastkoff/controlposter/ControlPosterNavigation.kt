@@ -93,9 +93,9 @@ private fun MainNavigation(
                 DashboardScreen(
                     tenantId = currentTenantId,
                     onSignOut = onSignOut,
-                    onCreatePoster = {},
-                    onAddBranch = {},
-                    onGoPair = {}
+                    onNavigateToDisplays = {},
+                    onNavigateToPlaylists = {},
+                    onNavigateToBranches = {}
                 )
             }
 
