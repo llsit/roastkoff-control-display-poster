@@ -37,7 +37,8 @@ fun PairManualScreen(
     tenantId: String,
     onDone: () -> Unit,
     viewModel: PairManualViewModel = hiltViewModel(),
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    onAddGroup: () -> Unit
 ) {
     val ui by viewModel.pairManualUi.collectAsState()
     LaunchedEffect(Unit) { viewModel.loadGroups(tenantId) }
@@ -84,16 +85,15 @@ fun PairManualScreen(
                 singleLine = true
             )
 
-            // group dropdown
             var expanded by remember { mutableStateOf(false) }
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded }) {
                 OutlinedTextField(
                     value = ui.groups.firstOrNull { it.first == ui.groupId }?.second
-                        ?: "เลือกสาขา (หรือเว้นว่าง)",
+                        ?: "เลือกกลุ่ม (หรือเพิ่มกลุ่ม)",
                     onValueChange = {},
-                    label = { Text("สาขา/กลุ่ม") },
+                    label = { Text("กลุ่ม") },
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                     modifier = Modifier
@@ -101,8 +101,8 @@ fun PairManualScreen(
                         .menuAnchor()
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    DropdownMenuItem(text = { Text("ไม่ระบุสาขา") }, onClick = {
-                        viewModel.setGroup(null); expanded = false
+                    DropdownMenuItem(text = { Text("เพิ่มกลุ่ม") }, onClick = {
+                        onAddGroup(); expanded = false
                     })
                     ui.groups.forEach { (id, name) ->
                         DropdownMenuItem(text = { Text(name) }, onClick = {

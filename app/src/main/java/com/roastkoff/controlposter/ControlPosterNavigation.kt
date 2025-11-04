@@ -111,7 +111,8 @@ private fun MainNavigation(
                 PairManualScreen(
                     tenantId = currentTenantId,
                     onDone = {},
-                    onClickBack = { navController.popBackStack() }
+                    onClickBack = { navController.popBackStack() },
+                    onAddGroup = { navController.navigate(MainRoute.AddGroup.path) }
                 )
             }
         }
