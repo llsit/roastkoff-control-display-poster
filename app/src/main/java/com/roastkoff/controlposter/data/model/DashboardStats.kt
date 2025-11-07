@@ -1,8 +1,12 @@
 package com.roastkoff.controlposter.data.model
 
 data class DashboardStats(
-    val displaysTotal: Int = 0,
-    val displaysOnline: Int = 0,
-    val playlistsTotal: Int = 0,
-    val branchesTotal: Int = 0
+    val groupTotal: Int = 0,
+    val dashboardDetail: List<Dashboard> = emptyList()
+)
+
+data class Dashboard(
+    val groupId: String = "",
+    val groupName: String = "",
+    val displayList: List<Display> = emptyList(),
 )

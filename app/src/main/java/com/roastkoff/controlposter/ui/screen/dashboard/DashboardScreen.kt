@@ -18,7 +18,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Store
 import androidx.compose.material.icons.outlined.Tv
@@ -30,7 +29,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -46,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.roastkoff.controlposter.data.model.DashboardStats
+import com.roastkoff.controlposter.data.model.Display
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,8 +99,8 @@ fun DashboardScreen(
 
                 is DashboardUiState.Success -> DashboardContent(
                     stats = s.stats,
-                    onOpenAddBranch = onOpenAddBranch,
-                    onOpenPairDisplay = onOpenPairDisplay
+                    onOpenPairDisplay = onOpenPairDisplay,
+                    onTapDisplay = onTapDisplay
                 )
             }
         }
@@ -109,21 +109,19 @@ fun DashboardScreen(
 
 @Composable
 private fun DashboardContent(
-    stats: com.roastkoff.controlposter.data.model.DashboardStats,
-    onOpenAddBranch: () -> Unit,
-    onOpenPairDisplay: () -> Unit
+    stats: DashboardStats,
+    onOpenPairDisplay: () -> Unit,
+    onTapDisplay: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Welcome Card
         item {
             WelcomeCard()
         }
 
-        // Stats Overview
         item {
             Text(
                 "Overview",
@@ -132,27 +130,31 @@ private fun DashboardContent(
             )
         }
 
-        // Display Stats Card
-        item {
-            DisplayStatsCard(
-                stats = stats,
-                onClick = onOpenPairDisplay
-            )
-        }
+        if (stats.dashboardDetail.isNotEmpty()) {
+            item {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "กลุ่มจอแสดงผล",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-        // Playlists Stats Card
-        item {
-            PlaylistStatsCard(
-                total = stats.playlistsTotal
-            )
-        }
-
-        // Branches/Groups Stats Card
-        item {
-            BranchStatsCard(
-                total = stats.branchesTotal,
-                onClick = onOpenAddBranch
-            )
+            items(stats.dashboardDetail.size) { index ->
+                val dashboard = stats.dashboardDetail[index]
+                GroupCard(
+                    groupName = dashboard.groupName,
+                    displays = dashboard.displayList,
+                    onTapDisplay = onTapDisplay
+                )
+            }
+        } else {
+            item {
+                EmptyStateCard(
+                    message = "ยังไม่มีกลุ่มจอแสดงผล",
+                    onClick = onOpenPairDisplay
+                )
+            }
         }
     }
 }
@@ -197,99 +199,61 @@ private fun WelcomeCard() {
 }
 
 @Composable
-private fun DisplayStatsCard(
-    stats: com.roastkoff.controlposter.data.model.DashboardStats,
-    onClick: () -> Unit
+private fun GroupCard(
+    groupName: String,
+    displays: List<Display>,
+    onTapDisplay: (String) -> Unit
 ) {
     ElevatedCard(
-        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Header กลุ่ม
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Icon(
-                            Icons.Outlined.Tv,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .size(28.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                    Text(
-                        "Displays",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            // Status Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            "${stats.displaysOnline}",
-                            style = MaterialTheme.typography.displayMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            "/ ${stats.displaysTotal}",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                    }
-                    Text(
-                        "Online / Total",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
+                Icon(
+                    Icons.Outlined.Store,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    groupName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.weight(1f))
                 Surface(
-                    shape = MaterialTheme.shapes.medium,
+                    shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
-                        "🟢 ${stats.displaysOnline} ออนไลน์",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium
+                        "${displays.size} จอ",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }
 
-            // Progress Bar (optional)
-            if (stats.displaysTotal > 0) {
-                LinearProgressIndicator(
-                    progress = { stats.displaysOnline.toFloat() / stats.displaysTotal.toFloat() },
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            if (displays.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    displays.forEach { display ->
+                        DisplayItem(
+                            display = display,
+                            onClick = { onTapDisplay(display.displayId) }
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    "ยังไม่มีจอในกลุ่มนี้",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
         }
@@ -297,45 +261,38 @@ private fun DisplayStatsCard(
 }
 
 @Composable
-private fun PlaylistStatsCard(total: Int) {
-    ElevatedCard(
+private fun DisplayItem(
+    display: Display,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                ) {
-                    Icon(
-                        Icons.Outlined.PlaylistPlay,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .size(28.dp),
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
 
-                Column {
+            Text(
+                if (display.status == "online") "🟢" else "⚫",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    display.name.ifBlank { "(ไม่มีชื่อ)" },
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                if (!display.location.isNullOrBlank()) {
                     Text(
-                        "Playlists",
-                        style = MaterialTheme.typography.titleMedium,
+                        display.location,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        "$total รายการ",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -350,58 +307,39 @@ private fun PlaylistStatsCard(total: Int) {
 }
 
 @Composable
-private fun BranchStatsCard(
-    total: Int,
+private fun EmptyStateCard(
+    message: String,
     onClick: () -> Unit
 ) {
-    ElevatedCard(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.tertiaryContainer
-                ) {
-                    Icon(
-                        Icons.Outlined.Store,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .size(28.dp),
-                        tint = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                }
-
-                Column {
-                    Text(
-                        "สาขา/กลุ่ม",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        "$total สาขา",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
             Icon(
-                Icons.Outlined.ChevronRight,
+                Icons.Outlined.Tv,
                 contentDescription = null,
+                modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Text(
+                message,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(onClick = onClick) {
+                Icon(Icons.Outlined.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("เพิ่มจอแสดงผล")
+            }
         }
     }
 }

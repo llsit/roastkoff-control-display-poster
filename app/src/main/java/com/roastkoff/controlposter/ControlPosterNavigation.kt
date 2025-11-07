@@ -110,8 +110,8 @@ private fun MainNavigation(
             composable(MainRoute.PairDisplay.path) {
                 PairManualScreen(
                     tenantId = currentTenantId,
-                    onDone = {},
-                    onClickBack = { navController.popBackStack() },
+                    onDone = { navController.navigateUp() },
+                    onClickBack = { navController.navigateUp() },
                     onAddGroup = { navController.navigate(MainRoute.AddGroup.path) }
                 )
             }

@@ -66,7 +66,7 @@ class PairManualViewModel @Inject constructor(
             runCatching {
                 displayRepository.createDisplay(
                     tenantId = tenantId,
-                    branchId = cur.groupId,
+                    groupId = cur.groupId,
                     name = cur.displayName.trim(),
                     location = cur.location.ifBlank { null },
                     code = cur.code.ifBlank { null }
