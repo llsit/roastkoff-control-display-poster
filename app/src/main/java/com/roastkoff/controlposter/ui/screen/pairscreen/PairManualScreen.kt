@@ -1,4 +1,4 @@
-package com.roastkoff.controlposter.ui.screen.display
+package com.roastkoff.controlposter.ui.screen.pairscreen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

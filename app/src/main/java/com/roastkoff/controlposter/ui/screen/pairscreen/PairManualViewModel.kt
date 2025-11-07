@@ -1,4 +1,4 @@
-package com.roastkoff.controlposter.ui.screen.display
+package com.roastkoff.controlposter.ui.screen.pairscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
