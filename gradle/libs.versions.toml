@@ -44,6 +44,7 @@ androidx-compose-icon = { group = "androidx.compose.material", name = "material-
 android-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltversion" }
 android-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltversion" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore-ktx" }
@@ -54,7 +55,6 @@ firebase-auth = { module = "com.google.firebase:firebase-auth" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }

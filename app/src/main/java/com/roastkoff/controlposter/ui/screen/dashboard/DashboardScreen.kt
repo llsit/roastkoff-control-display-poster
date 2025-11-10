@@ -77,6 +77,13 @@ fun DashboardScreen(
                     TextButton(onClick = onOpenAddGroup) {
                         Text("เพิ่มสาขา/กลุ่ม")
                     }
+                    TextButton(onClick = {}) {
+                        Text(
+                            "ออกจากระบบ",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             )
         },
@@ -120,14 +127,6 @@ private fun DashboardContent(
     ) {
         item {
             WelcomeCard()
-        }
-
-        item {
-            Text(
-                "Overview",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
         }
 
         if (stats.dashboardDetail.isNotEmpty()) {

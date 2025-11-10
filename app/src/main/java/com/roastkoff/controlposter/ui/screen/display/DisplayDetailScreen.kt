@@ -54,7 +54,7 @@ fun DisplayDetailScreen(
     viewModel: DisplayDetailViewModel = hiltViewModel(),
     onClickBack: () -> Unit,
     onTapPlaylist: (String) -> Unit,
-    onAddPlaylist: () -> Unit
+    onAddPlaylist: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -84,7 +84,15 @@ fun DisplayDetailScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddPlaylist) {
+            FloatingActionButton(onClick = {
+                val groupId = when (val state = uiState) {
+                    is DisplayDetailUiState.Success -> state.display.groupId
+                    else -> {
+                        ""
+                    }
+                }
+                onAddPlaylist(groupId.orEmpty())
+            }) {
                 Icon(Icons.Outlined.Add, contentDescription = "Add Playlist")
             }
         }

@@ -8,10 +8,13 @@ import com.roastkoff.controlposter.data.DisplayRepository
 import com.roastkoff.controlposter.data.DisplayRepositoryImpl
 import com.roastkoff.controlposter.data.GroupRepository
 import com.roastkoff.controlposter.data.GroupRepositoryImpl
+import com.roastkoff.controlposter.data.PlaylistRepository
+import com.roastkoff.controlposter.data.PlaylistRepositoryImpl
 import com.roastkoff.controlposter.data.UserRepository
 import com.roastkoff.controlposter.data.UserRepositoryImpl
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
@@ -33,4 +36,7 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindDisplayRepositoryImpl(displayRepository: DisplayRepositoryImpl): DisplayRepository
+
+    @Binds
+    abstract fun bindPlaylistRepository(playlistRepository: PlaylistRepositoryImpl): PlaylistRepository
 }

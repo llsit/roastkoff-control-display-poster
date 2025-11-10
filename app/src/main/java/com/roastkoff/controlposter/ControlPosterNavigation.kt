@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.roastkoff.controlposter.data.model.AuthState
+import com.roastkoff.controlposter.ui.screen.addplaylist.AddPlaylistScreen
 import com.roastkoff.controlposter.ui.screen.authen.AuthGateScreen
 import com.roastkoff.controlposter.ui.screen.authen.AuthViewModel
 import com.roastkoff.controlposter.ui.screen.dashboard.DashboardScreen
@@ -117,7 +118,8 @@ private fun MainNavigation(
                     DisplayDetailScreen(
                         displayId = key.displayId,
                         onClickBack = { backStack.removeLastOrNull() },
-                        onTapPlaylist = { }
+                        onTapPlaylist = { },
+                        onAddPlaylist = { backStack.add(MainRoute.AddPlaylist(it)) }
                     )
                 }
 
@@ -127,6 +129,13 @@ private fun MainNavigation(
                         onDone = { backStack.removeLastOrNull() },
                         onClickBack = { backStack.removeLastOrNull() },
                         onAddGroup = { backStack.add(MainRoute.AddGroup) }
+                    )
+                }
+
+                is MainRoute.AddPlaylist -> NavEntry(key) {
+                    AddPlaylistScreen(
+                        groupId = key.groupId,
+                        onNavigateBack = { backStack.removeLastOrNull() }
                     )
                 }
 
@@ -147,4 +156,5 @@ sealed class MainRoute() {
     data object AddGroup : MainRoute()
     data object PairDisplay : MainRoute()
     data class Display(val displayId: String) : MainRoute()
+    data class AddPlaylist(val groupId: String) : MainRoute()
 }

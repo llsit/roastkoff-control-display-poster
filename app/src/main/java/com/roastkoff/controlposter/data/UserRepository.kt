@@ -1,6 +1,7 @@
 package com.roastkoff.controlposter.data
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.roastkoff.controlposter.common.ControlPreferences
 import com.roastkoff.controlposter.data.model.UserProfile
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -10,7 +11,8 @@ interface UserRepository {
 }
 
 class UserRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val prefs: ControlPreferences
 ) : UserRepository {
 
     override suspend fun ensureProfile(uid: String): Result<UserProfile> {
@@ -29,14 +31,15 @@ class UserRepositoryImpl @Inject constructor(
             validateProfileData(data)?.let { error ->
                 return Result.failure(error)
             }
-
+            val tenantId = data[FIELD_TENANT_ID] as String
             val profile = UserProfile(
                 uid = uid,
                 email = data[FIELD_EMAIL] as? String ?: "",
                 displayName = data[FIELD_DISPLAY_NAME] as? String,
-                tenantId = data[FIELD_TENANT_ID] as String,
+                tenantId = tenantId,
                 role = data[FIELD_ROLE] as? String ?: DEFAULT_ROLE
             )
+            prefs.saveTenantId(tenantId)
 
             Result.success(profile)
         } catch (e: Exception) {
