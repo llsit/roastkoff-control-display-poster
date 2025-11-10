@@ -2,7 +2,7 @@ package com.roastkoff.controlposter
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -86,52 +86,54 @@ private fun MainNavigation(
     currentTenantId: String,
     onSignOut: () -> Unit
 ) {
-    val backStack = remember { mutableStateListOf<MainRoute>(MainRoute.Dashboard) }
+    val backStack = remember { mutableStateListOf<Any>(MainRoute.Dashboard) }
 
-    Scaffold {
-        NavDisplay(
-            backStack = backStack,
-            onBack = { backStack.removeLastOrNull() },
-            entryProvider = { key ->
-                when (key) {
-                    MainRoute.AddGroup -> NavEntry(key) {
-                        AddGroupScreen(
-                            tenantId = currentTenantId,
-                            onSaved = { backStack.removeLastOrNull() },
-                            onClickBack = { backStack.removeLastOrNull() }
-                        )
-                    }
-
-                    MainRoute.Dashboard -> NavEntry(key) {
-                        DashboardScreen(
-                            tenantId = currentTenantId,
-                            onSignOut = onSignOut,
-                            onTapDisplay = { backStack.add(MainRoute.Display) },
-                            onOpenAddBranch = { backStack.add(MainRoute.PairDisplay) },
-                            onOpenPairDisplay = { backStack.add(MainRoute.PairDisplay) }
-                        )
-                    }
-
-                    MainRoute.Display -> NavEntry(key) {
-                        DisplayDetailScreen(
-                            tenantId = currentTenantId,
-                            onClickBack = { backStack.removeLastOrNull() },
-                            onTapPlaylist = { }
-                        )
-                    }
-
-                    MainRoute.PairDisplay -> NavEntry(key) {
-                        PairManualScreen(
-                            tenantId = currentTenantId,
-                            onDone = { backStack.removeLastOrNull() },
-                            onClickBack = { backStack.removeLastOrNull() },
-                            onAddGroup = { backStack.add(MainRoute.AddGroup) }
-                        )
-                    }
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryProvider = { key ->
+            when (key) {
+                is MainRoute.AddGroup -> NavEntry(key) {
+                    AddGroupScreen(
+                        tenantId = currentTenantId,
+                        onSaved = { backStack.removeLastOrNull() },
+                        onClickBack = { backStack.removeLastOrNull() }
+                    )
                 }
+
+                is MainRoute.Dashboard -> NavEntry(key) {
+                    DashboardScreen(
+                        tenantId = currentTenantId,
+                        onSignOut = onSignOut,
+                        onTapDisplay = {
+                            backStack.add(MainRoute.Display(it))
+                        },
+                        onOpenAddGroup = { backStack.add(MainRoute.AddGroup) },
+                        onOpenPairDisplay = { backStack.add(MainRoute.PairDisplay) }
+                    )
+                }
+
+                is MainRoute.Display -> NavEntry(key) {
+                    DisplayDetailScreen(
+                        displayId = key.displayId,
+                        onClickBack = { backStack.removeLastOrNull() },
+                        onTapPlaylist = { }
+                    )
+                }
+
+                is MainRoute.PairDisplay -> NavEntry(key) {
+                    PairManualScreen(
+                        tenantId = currentTenantId,
+                        onDone = { backStack.removeLastOrNull() },
+                        onClickBack = { backStack.removeLastOrNull() },
+                        onAddGroup = { backStack.add(MainRoute.AddGroup) }
+                    )
+                }
+
+                else -> NavEntry(Unit) { Text("Unknown route") }
             }
-        )
-    }
+        }
+    )
 }
 
 object Route {
@@ -144,5 +146,5 @@ sealed class MainRoute() {
     data object Dashboard : MainRoute()
     data object AddGroup : MainRoute()
     data object PairDisplay : MainRoute()
-    data object Display : MainRoute()
+    data class Display(val displayId: String) : MainRoute()
 }

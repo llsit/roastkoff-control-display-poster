@@ -51,7 +51,7 @@ import com.roastkoff.controlposter.data.model.Display
 @Composable
 fun DashboardScreen(
     tenantId: String,
-    onOpenAddBranch: () -> Unit,
+    onOpenAddGroup: () -> Unit,
     onOpenPairDisplay: () -> Unit,
     onTapDisplay: (displayId: String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -74,7 +74,7 @@ fun DashboardScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onOpenAddBranch) {
+                    TextButton(onClick = onOpenAddGroup) {
                         Text("เพิ่มสาขา/กลุ่ม")
                     }
                 }
