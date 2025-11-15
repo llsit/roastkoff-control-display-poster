@@ -25,6 +25,8 @@ import com.roastkoff.controlposter.ui.screen.display.DisplayDetailScreen
 import com.roastkoff.controlposter.ui.screen.group.AddGroupScreen
 import com.roastkoff.controlposter.ui.screen.login.LoginScreen
 import com.roastkoff.controlposter.ui.screen.pairscreen.PairManualScreen
+import com.roastkoff.controlposter.ui.screen.playlist.AddPlaylistItemScreen
+import com.roastkoff.controlposter.ui.screen.playlist.PlaylistDetailScreen
 
 @Composable
 fun ControlPosterNavigation(
@@ -118,7 +120,7 @@ private fun MainNavigation(
                     DisplayDetailScreen(
                         displayId = key.displayId,
                         onClickBack = { backStack.removeLastOrNull() },
-                        onTapPlaylist = { },
+                        onTapPlaylist = { backStack.add(MainRoute.Playlist(it)) },
                         onAddPlaylist = { groupId, displayId ->
                             backStack.add(MainRoute.AddPlaylist(groupId, displayId))
                         }
@@ -142,6 +144,21 @@ private fun MainNavigation(
                     )
                 }
 
+                is MainRoute.Playlist -> NavEntry(key) {
+                    PlaylistDetailScreen(
+                        playlistId = key.playlistId,
+                        onNavigateBack = {},
+                        onAddItem = { backStack.add(MainRoute.AddItemPlaylist) },
+                        onEditItem = {})
+                }
+
+                is MainRoute.AddItemPlaylist -> NavEntry(key) {
+                    AddPlaylistItemScreen(
+                        playlistId = "",
+                        onNavigateBack = { backStack.removeLastOrNull() }
+                    )
+                }
+
                 else -> NavEntry(Unit) { Text("Unknown route") }
             }
         }
@@ -160,4 +177,6 @@ sealed class MainRoute() {
     data object PairDisplay : MainRoute()
     data class Display(val displayId: String) : MainRoute()
     data class AddPlaylist(val groupId: String, val displayId: String) : MainRoute()
+    data class Playlist(val playlistId: String) : MainRoute()
+    data object AddItemPlaylist : MainRoute()
 }
