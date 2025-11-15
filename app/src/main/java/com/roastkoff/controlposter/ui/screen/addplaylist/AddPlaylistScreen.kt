@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun AddPlaylistScreen(
     groupId: String,
+    displayId: String,
     onNavigateBack: () -> Unit,
     viewModel: AddPlaylistViewModel = hiltViewModel()
 ) {
@@ -240,6 +241,7 @@ fun AddPlaylistScreen(
                         ) {
                             viewModel.createPlaylist(
                                 groupId = groupId,
+                                displayId = displayId,
                                 formData = PlaylistFormData(
                                     name = playlistName,
                                     loop = loop,

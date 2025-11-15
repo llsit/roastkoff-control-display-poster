@@ -1,5 +1,6 @@
 package com.roastkoff.controlposter.data
 
+import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -136,31 +137,35 @@ class DisplayRepositoryImpl @Inject constructor(
                 groupId = displayDoc.getString("groupId")
             )
 
-            // ดึง playlists ที่ active บนจอนี้
-            val activePlaylistId = displayDoc.getString("activePlaylistId")
+            val tenantId = displayDoc.getString("tenantId")
 
-            val playlists = if (activePlaylistId != null) {
-                val playlistDoc = firestore.collection("playlists")
-                    .document(activePlaylistId)
+            val playlists = if (!display.groupId.isNullOrBlank()) {
+                val playlistsSnapshot = firestore.collection("playlists")
+                    .whereEqualTo("tenantId", tenantId)
+                    .whereEqualTo("groupId", display.groupId)
                     .get()
                     .await()
 
-                if (playlistDoc.exists()) {
-                    listOf(
+                playlistsSnapshot.documents.mapNotNull { doc ->
+                    try {
                         Playlist(
-                            id = playlistDoc.id,
-                            name = playlistDoc.getString("name") ?: "",
-                            items = playlistDoc.get("items") as? List<String> ?: emptyList(),
-                            loop = playlistDoc.getBoolean("loop") ?: false,
-                            shuffle = playlistDoc.getBoolean("shuffle") ?: false,
-                            defaultIntervalMs = playlistDoc.getLong("defaultIntervalMs")?.toInt()
-                                ?: 5000,
-                            groupId = playlistDoc.getString("groupId"),
-                            tenantId = playlistDoc.getString("tenantId") ?: ""
+                            id = doc.id,
+                            name = doc.getString("name") ?: "",
+                            items = doc.get("items") as? List<String> ?: emptyList(),
+                            loop = doc.getBoolean("loop") ?: false,
+                            shuffle = doc.getBoolean("shuffle") ?: false,
+                            defaultIntervalMs = doc.getLong("defaultIntervalMs")?.toInt() ?: 5000,
+                            groupId = doc.getString("groupId"),
+                            tenantId = doc.getString("tenantId") ?: ""
                         )
-                    )
-                } else emptyList()
-            } else emptyList()
+                    } catch (e: Exception) {
+                        Log.e("DisplayRepo", "Error parsing playlist ${doc.id}", e)
+                        null
+                    }
+                }
+            } else {
+                emptyList()
+            }
 
             emit(display to playlists)
         }

@@ -119,7 +119,9 @@ private fun MainNavigation(
                         displayId = key.displayId,
                         onClickBack = { backStack.removeLastOrNull() },
                         onTapPlaylist = { },
-                        onAddPlaylist = { backStack.add(MainRoute.AddPlaylist(it)) }
+                        onAddPlaylist = { groupId, displayId ->
+                            backStack.add(MainRoute.AddPlaylist(groupId, displayId))
+                        }
                     )
                 }
 
@@ -135,6 +137,7 @@ private fun MainNavigation(
                 is MainRoute.AddPlaylist -> NavEntry(key) {
                     AddPlaylistScreen(
                         groupId = key.groupId,
+                        displayId = key.displayId,
                         onNavigateBack = { backStack.removeLastOrNull() }
                     )
                 }
@@ -156,5 +159,5 @@ sealed class MainRoute() {
     data object AddGroup : MainRoute()
     data object PairDisplay : MainRoute()
     data class Display(val displayId: String) : MainRoute()
-    data class AddPlaylist(val groupId: String) : MainRoute()
+    data class AddPlaylist(val groupId: String, val displayId: String) : MainRoute()
 }

@@ -25,12 +25,13 @@ class AddPlaylistViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<AddPlaylistUiState>(AddPlaylistUiState.Idle)
     val uiState: StateFlow<AddPlaylistUiState> = _uiState.asStateFlow()
 
-    fun createPlaylist(groupId: String, formData: PlaylistFormData) {
+    fun createPlaylist(groupId: String, displayId: String, formData: PlaylistFormData) {
         viewModelScope.launch {
             _uiState.value = AddPlaylistUiState.Loading
             try {
                 playlistRepository.createPlaylist(
                     groupId = groupId,
+                    displayId = displayId,
                     name = formData.name,
                     loop = formData.loop,
                     shuffle = formData.shuffle,

@@ -19,7 +19,7 @@ sealed interface DashboardUiState {
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val dashRepository: DashRepository
+    private val dashRepository: DashRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DashboardUiState>(DashboardUiState.Loading)
