@@ -1,1 +1,30 @@
+# --- Firebase / Google Services ---
+**/google-services.json
+**/GoogleService-Info.plist
+**/google-services.plist
+
+# If saved in per-flavor source sets
+app/src/*/google-services.json
+app/src/*/GoogleService-Info.plist
+
+# Prevent accidental uploads in root
+/google-services.json
+/GoogleService-Info.plist
+
+# Firebase Crashlytics
+**/mapping.txt
+**/firebase-crashlytics.properties
+**/crashlytics-build.properties
+
+# --- Gradle generated build folder ---
 /build
+*/build
+
+# --- Android Studio ---
+*.iml
+.idea
+.cache
+local.properties
+
+# --- Misc ---
+.DS_Store
