@@ -1,4 +1,4 @@
-package com.roastkoff.controlposter.ui.screen.playlist
+package com.roastkoff.controlposter.ui.screen.addItems
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,10 +43,7 @@ fun AddPlaylistItemScreen(
 ) {
     var itemName by remember { mutableStateOf("") }
     var itemType by remember { mutableStateOf("image") }
-    var itemUrl by remember { mutableStateOf("") }
-
     var nameError by remember { mutableStateOf(false) }
-    var urlError by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -180,47 +177,17 @@ fun AddPlaylistItemScreen(
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        "หรือใช้ URL",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
-                    OutlinedTextField(
-                        value = itemUrl,
-                        onValueChange = {
-                            itemUrl = it
-                            urlError = false
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("https://example.com/image.jpg") },
-                        isError = urlError,
-                        supportingText = if (urlError) {
-                            { Text("URL ไม่ถูกต้อง") }
-                        } else null,
-                        singleLine = true
-                    )
-                }
-            }
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
             ) {
                 Button(
                     onClick = {
-                        if (itemName.isNotBlank() && itemUrl.isNotBlank()) {
+                        if (itemName.isNotBlank()) {
 
                             onNavigateBack()
                         } else {
                             nameError = itemName.isBlank()
-                            urlError = itemUrl.isBlank()
                         }
                     },
                     modifier = Modifier.width(120.dp)

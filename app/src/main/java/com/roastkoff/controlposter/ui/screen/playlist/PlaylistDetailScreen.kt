@@ -28,25 +28,29 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.roastkoff.controlposter.data.PlaylistItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistDetailScreen(
     playlistId: String,
+    playlistName: String = "playlist1",
     onNavigateBack: () -> Unit,
     onAddItem: () -> Unit,
-    onEditItem: (itemId: String) -> Unit
+    onEditItem: (itemId: String) -> Unit,
+    viewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
-    // Mock data
-    val playlistName = "playlist1"
-    val items = listOf(
-        PlaylistItemMock("1", "image1", "image", "https://example.com/image1.jpg"),
-        PlaylistItemMock("2", "video1", "video", "https://example.com/video1.mp4")
-    )
+
+    val state by viewModel.playlistUiState.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { viewModel.loadPlaylistDetail(playlistId) }
 
     Scaffold(
         topBar = {
@@ -65,43 +69,53 @@ fun PlaylistDetailScreen(
             }
         }
     ) { padding ->
-        if (items.isEmpty()) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Icon(
-                        Icons.Outlined.Image,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        "ยังไม่มี Item",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+        when (state) {
+            is PlaylistUiState.Error -> {}
+            PlaylistUiState.Loading -> {
+
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(items.size) { index ->
-                    PlaylistItemCard(
-                        item = items[index],
-                        onEdit = { onEditItem(items[index].id) }
-                    )
+
+            is PlaylistUiState.Success -> {
+                val items = (state as PlaylistUiState.Success).playlist.items
+                if (items.isEmpty()) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Icon(
+                                Icons.Outlined.Image,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "ยังไม่มี Item",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(items.size) { index ->
+                            PlaylistItemCard(
+                                item = items[index],
+                                onEdit = { onEditItem(items[index].id) }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -110,7 +124,7 @@ fun PlaylistDetailScreen(
 
 @Composable
 private fun PlaylistItemCard(
-    item: PlaylistItemMock,
+    item: PlaylistItem,
     onEdit: () -> Unit
 ) {
     ElevatedCard(
@@ -140,7 +154,7 @@ private fun PlaylistItemCard(
             }
 
             Text(
-                item.name,
+                "name",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f)
@@ -152,7 +166,7 @@ private fun PlaylistItemCard(
                 tint = MaterialTheme.colorScheme.primary
             )
 
-            IconButton(onClick = {  }) {
+            IconButton(onClick = { }) {
                 Icon(
                     Icons.Outlined.Delete,
                     contentDescription = "Delete",
@@ -162,10 +176,3 @@ private fun PlaylistItemCard(
         }
     }
 }
-
-data class PlaylistItemMock(
-    val id: String,
-    val name: String,
-    val type: String, // "image" or "video"
-    val url: String
-)

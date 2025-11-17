@@ -1,19 +1,13 @@
 package com.roastkoff.controlposter
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.roastkoff.controlposter.data.model.AuthState
@@ -25,63 +19,60 @@ import com.roastkoff.controlposter.ui.screen.display.DisplayDetailScreen
 import com.roastkoff.controlposter.ui.screen.group.AddGroupScreen
 import com.roastkoff.controlposter.ui.screen.login.LoginScreen
 import com.roastkoff.controlposter.ui.screen.pairscreen.PairManualScreen
-import com.roastkoff.controlposter.ui.screen.playlist.AddPlaylistItemScreen
+import com.roastkoff.controlposter.ui.screen.addItems.AddPlaylistItemScreen
 import com.roastkoff.controlposter.ui.screen.playlist.PlaylistDetailScreen
 
 @Composable
 fun ControlPosterNavigation(
     paddingValues: PaddingValues,
-    navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
-    NavHost(
-        navController = navController,
-        startDestination = Route.AUTH_GATE,
-        modifier = Modifier.padding(paddingValues)
-    ) {
-        composable(Route.AUTH_GATE) {
-            AuthGateScreen(
-                viewModel = authViewModel,
-                onAuthenticated = {
-                    navController.navigate(Route.MAIN) {
-                        popUpTo(Route.AUTH_GATE) { inclusive = true }
-                    }
-                },
-                onUnauthenticated = {
-                    navController.navigate(Route.LOGIN) {
-                        popUpTo(Route.AUTH_GATE) { inclusive = true }
-                    }
-                }
-            )
-        }
+    val mainBackStack = remember { mutableStateListOf<Any>(RootRoute.AuthGate) }
 
-        composable(Route.LOGIN) {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(Route.AUTH_GATE) {
-                        popUpTo(Route.LOGIN) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Route.MAIN) {
-            if (authState is AuthState.Authorized) {
-                val currentTenantId = (authState as AuthState.Authorized).profile.tenantId
-                MainNavigation(
-                    currentTenantId = currentTenantId,
-                    onSignOut = {
-                        authViewModel.signOut()
-                        navController.navigate(Route.LOGIN) {
-                            popUpTo(0) { inclusive = true }
+    NavDisplay(
+        backStack = mainBackStack,
+        onBack = { mainBackStack.removeLastOrNull() },
+        entryProvider = { key ->
+            when (key) {
+                is RootRoute.AuthGate -> NavEntry(key) {
+                    AuthGateScreen(
+                        viewModel = authViewModel,
+                        onAuthenticated = {
+                            mainBackStack.add(RootRoute.Main)
+                        },
+                        onUnauthenticated = {
+                            mainBackStack.add(RootRoute.Login)
                         }
+                    )
+                }
+
+                is RootRoute.Login -> NavEntry(key) {
+                    LoginScreen(
+                        onLoginSuccess = {
+                            mainBackStack.add(RootRoute.AuthGate)
+                        }
+                    )
+                }
+
+                is RootRoute.Main -> NavEntry(key) {
+                    if (authState is AuthState.Authorized) {
+                        val currentTenantId = (authState as AuthState.Authorized).profile.tenantId
+                        MainNavigation(
+                            currentTenantId = currentTenantId,
+                            onSignOut = {
+                                authViewModel.signOut()
+                                mainBackStack.add(RootRoute.Login)
+                            }
+                        )
                     }
-                )
+                }
+
+                else -> NavEntry(Unit) { Text("Unknown route") }
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -147,9 +138,10 @@ private fun MainNavigation(
                 is MainRoute.Playlist -> NavEntry(key) {
                     PlaylistDetailScreen(
                         playlistId = key.playlistId,
-                        onNavigateBack = {},
+                        onNavigateBack = { backStack.removeLastOrNull() },
                         onAddItem = { backStack.add(MainRoute.AddItemPlaylist) },
-                        onEditItem = {})
+                        onEditItem = {}
+                    )
                 }
 
                 is MainRoute.AddItemPlaylist -> NavEntry(key) {
@@ -165,10 +157,10 @@ private fun MainNavigation(
     )
 }
 
-object Route {
-    const val AUTH_GATE = "auth_gate"
-    const val LOGIN = "login"
-    const val MAIN = "main"
+sealed class RootRoute() {
+    data object AuthGate : RootRoute()
+    data object Login : RootRoute()
+    data object Main : RootRoute()
 }
 
 sealed class MainRoute() {
