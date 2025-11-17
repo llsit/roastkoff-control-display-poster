@@ -1,5 +1,6 @@
 package com.roastkoff.controlposter
 
+import AuthViewModel
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,15 +12,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.roastkoff.controlposter.data.model.AuthState
+import com.roastkoff.controlposter.ui.screen.addItems.AddPlaylistItemScreen
 import com.roastkoff.controlposter.ui.screen.addplaylist.AddPlaylistScreen
 import com.roastkoff.controlposter.ui.screen.authen.AuthGateScreen
-import com.roastkoff.controlposter.ui.screen.authen.AuthViewModel
 import com.roastkoff.controlposter.ui.screen.dashboard.DashboardScreen
 import com.roastkoff.controlposter.ui.screen.display.DisplayDetailScreen
 import com.roastkoff.controlposter.ui.screen.group.AddGroupScreen
 import com.roastkoff.controlposter.ui.screen.login.LoginScreen
 import com.roastkoff.controlposter.ui.screen.pairscreen.PairManualScreen
-import com.roastkoff.controlposter.ui.screen.addItems.AddPlaylistItemScreen
 import com.roastkoff.controlposter.ui.screen.playlist.PlaylistDetailScreen
 
 @Composable
