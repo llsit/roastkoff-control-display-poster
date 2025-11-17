@@ -1,6 +1,5 @@
 package com.roastkoff.controlposter.ui.screen.authen
 
-import AuthViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

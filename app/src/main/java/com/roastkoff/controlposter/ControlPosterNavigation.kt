@@ -1,6 +1,5 @@
 package com.roastkoff.controlposter
 
-import AuthViewModel
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +14,7 @@ import com.roastkoff.controlposter.data.model.AuthState
 import com.roastkoff.controlposter.ui.screen.addItems.AddPlaylistItemScreen
 import com.roastkoff.controlposter.ui.screen.addplaylist.AddPlaylistScreen
 import com.roastkoff.controlposter.ui.screen.authen.AuthGateScreen
+import com.roastkoff.controlposter.ui.screen.authen.AuthViewModel
 import com.roastkoff.controlposter.ui.screen.dashboard.DashboardScreen
 import com.roastkoff.controlposter.ui.screen.display.DisplayDetailScreen
 import com.roastkoff.controlposter.ui.screen.group.AddGroupScreen

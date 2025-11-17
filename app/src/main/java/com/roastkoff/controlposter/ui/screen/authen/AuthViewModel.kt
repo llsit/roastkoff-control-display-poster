@@ -1,3 +1,5 @@
+package com.roastkoff.controlposter.ui.screen.authen
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roastkoff.controlposter.data.AuthRepository

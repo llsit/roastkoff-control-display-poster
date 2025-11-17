@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.ErrorOutline
@@ -315,7 +316,7 @@ private fun PlaylistCard(
                 color = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Icon(
-                    Icons.Outlined.PlaylistPlay,
+                    Icons.AutoMirrored.Outlined.PlaylistPlay,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(12.dp)
