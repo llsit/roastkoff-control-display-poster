@@ -40,7 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.roastkoff.controlposter.common.UiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,10 +63,19 @@ fun AddPlaylistScreen(
 
     var nameError by remember { mutableStateOf(false) }
     var intervalError by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is UiEvent.NavigateBack -> {
+                        onNavigateBack()
+                        viewModel.resetState()
+                    }
 
-    LaunchedEffect(uiState) {
-        if (uiState is AddPlaylistUiState.Success) {
-            onNavigateBack()
+                    is UiEvent.ShowSnackbar -> {}
+                }
+            }
         }
     }
 

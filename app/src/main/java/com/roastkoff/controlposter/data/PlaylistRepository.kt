@@ -1,12 +1,15 @@
 package com.roastkoff.controlposter.data
 
+import android.net.Uri
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.roastkoff.controlposter.common.ControlPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 
 interface PlaylistRepository {
@@ -20,15 +23,27 @@ interface PlaylistRepository {
     ): String
 
     fun getPlaylist(playlistId: String): Flow<PlaylistData>
+
+    suspend fun addItemToPlaylist(
+        playlistId: String,
+        itemName: String,
+        itemType: String,
+        durationMs: Int,
+        fit: String,
+        mute: Boolean,
+        mediaUri: Uri,
+    )
 }
 
 class PlaylistRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val prefs: ControlPreferences
+    private val prefs: ControlPreferences,
+    private val storage: FirebaseStorage
 ) : PlaylistRepository {
 
     companion object {
         private const val COLLECTION_PLAYLISTS = "playlists"
+        private const val MAX_FILE_SIZE = 5 * 1024 * 1024L // 5 MB
     }
 
     override suspend fun createPlaylist(
@@ -93,6 +108,51 @@ class PlaylistRepositoryImpl @Inject constructor(
         )
 
         emit(data)
+    }
+
+    override suspend fun addItemToPlaylist(
+        playlistId: String,
+        itemName: String,
+        itemType: String,
+        durationMs: Int,
+        fit: String,
+        mute: Boolean,
+        mediaUri: Uri
+    ) {
+        val fileExtension = when (itemType) {
+            "image" -> "jpg"
+            "video" -> "mp4"
+            else -> "bin"
+        }
+
+        val fileName = "${UUID.randomUUID()}.$fileExtension"
+        val storageRef = storage.reference
+            .child("playlists")
+            .child(playlistId)
+            .child(fileName)
+
+        storageRef.putFile(mediaUri).await()
+
+        val downloadUrl = storageRef.downloadUrl.await().toString()
+
+        val newItem = PlaylistItem(
+            id = "item_${System.currentTimeMillis()}",
+            durationMs = durationMs,
+            fit = fit,
+            mute = mute,
+            src = downloadUrl,
+            type = itemType
+        )
+
+        firestore.collection("playlists")
+            .document(playlistId)
+            .update(
+                mapOf(
+                    "items" to FieldValue.arrayUnion(newItem),
+                    "updatedAt" to FieldValue.serverTimestamp()
+                )
+            )
+            .await()
     }
 }
 

@@ -2,6 +2,7 @@ package com.roastkoff.controlposter.ui.screen.group
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.GroupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -20,7 +21,7 @@ data class AddGroupUi(
 @HiltViewModel
 class AddGroupViewModel @Inject constructor(
     private val repository: GroupRepository
-) : ViewModel() {
+) : BaseViewModel() {
     private val _addGroupUi = MutableStateFlow(AddGroupUi())
     val addGroupUi: StateFlow<AddGroupUi> = _addGroupUi.asStateFlow()
 
@@ -39,11 +40,16 @@ class AddGroupViewModel @Inject constructor(
             runCatching {
                 repository.createGroup(tenantId, current.name.trim())
             }.onSuccess {
-                _addGroupUi.value = _addGroupUi.value.copy(loading = false, done = true)
+                _addGroupUi.value = _addGroupUi.value.copy(loading = false)
+                onNavigationBack()
             }.onFailure { e ->
                 _addGroupUi.value =
                     _addGroupUi.value.copy(loading = false, error = e.message ?: "Failed to save")
             }
         }
+    }
+
+    fun resetState() {
+        _addGroupUi.value = AddGroupUi()
     }
 }

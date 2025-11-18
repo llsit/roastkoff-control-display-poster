@@ -90,7 +90,7 @@ private fun MainNavigation(
                 is MainRoute.AddGroup -> NavEntry(key) {
                     AddGroupScreen(
                         tenantId = currentTenantId,
-                        onSaved = { backStack.removeLastOrNull() },
+                        onDone = { backStack.removeLastOrNull() },
                         onClickBack = { backStack.removeLastOrNull() }
                     )
                 }
@@ -139,14 +139,14 @@ private fun MainNavigation(
                     PlaylistDetailScreen(
                         playlistId = key.playlistId,
                         onNavigateBack = { backStack.removeLastOrNull() },
-                        onAddItem = { backStack.add(MainRoute.AddItemPlaylist) },
+                        onAddItem = { backStack.add(MainRoute.AddItemPlaylist(it)) },
                         onEditItem = {}
                     )
                 }
 
                 is MainRoute.AddItemPlaylist -> NavEntry(key) {
                     AddPlaylistItemScreen(
-                        playlistId = "",
+                        playlistId = key.playlistId,
                         onNavigateBack = { backStack.removeLastOrNull() }
                     )
                 }
@@ -170,5 +170,5 @@ sealed class MainRoute() {
     data class Display(val displayId: String) : MainRoute()
     data class AddPlaylist(val groupId: String, val displayId: String) : MainRoute()
     data class Playlist(val playlistId: String) : MainRoute()
-    data object AddItemPlaylist : MainRoute()
+    data class AddItemPlaylist(val playlistId: String) : MainRoute()
 }

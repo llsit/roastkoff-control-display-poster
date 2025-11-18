@@ -31,6 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import com.roastkoff.controlposter.common.UiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +47,22 @@ fun PairManualScreen(
 ) {
     val ui by viewModel.pairManualUi.collectAsState()
     LaunchedEffect(Unit) { viewModel.loadGroups(tenantId) }
-    LaunchedEffect(ui.done) { if (ui.done) onDone() }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is UiEvent.NavigateBack -> {
+                        onDone()
+                        viewModel.resetState()
+                    }
+
+                    is UiEvent.ShowSnackbar -> {}
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -99,16 +118,27 @@ fun PairManualScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable,true)
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
                 )
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    DropdownMenuItem(text = { Text("เพิ่มกลุ่ม") }, onClick = {
-                        onAddGroup(); expanded = false
-                    })
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("เพิ่มกลุ่ม") },
+                        onClick = {
+                            onAddGroup()
+                            expanded = false
+                        }
+                    )
                     ui.groups.forEach { (id, name) ->
-                        DropdownMenuItem(text = { Text(name) }, onClick = {
-                            viewModel.setGroup(id); expanded = false
-                        })
+                        DropdownMenuItem(
+                            text = { Text(name) },
+                            onClick = {
+                                viewModel.setGroup(id)
+                                expanded = false
+                            }
+                        )
                     }
                 }
             }

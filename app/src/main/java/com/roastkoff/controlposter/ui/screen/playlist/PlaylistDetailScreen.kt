@@ -44,7 +44,7 @@ fun PlaylistDetailScreen(
     playlistId: String,
     playlistName: String = "playlist1",
     onNavigateBack: () -> Unit,
-    onAddItem: () -> Unit,
+    onAddItem: (playlistId: String) -> Unit,
     onEditItem: (itemId: String) -> Unit,
     viewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
@@ -64,7 +64,7 @@ fun PlaylistDetailScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddItem) {
+            FloatingActionButton(onClick = { onAddItem(playlistId) }) {
                 Icon(Icons.Outlined.Add, "Add Item")
             }
         }

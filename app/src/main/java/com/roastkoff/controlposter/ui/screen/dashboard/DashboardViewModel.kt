@@ -2,6 +2,7 @@ package com.roastkoff.controlposter.ui.screen.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.DashRepository
 import com.roastkoff.controlposter.data.model.DashboardStats
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,7 @@ sealed interface DashboardUiState {
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val dashRepository: DashRepository,
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow<DashboardUiState>(DashboardUiState.Loading)
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()

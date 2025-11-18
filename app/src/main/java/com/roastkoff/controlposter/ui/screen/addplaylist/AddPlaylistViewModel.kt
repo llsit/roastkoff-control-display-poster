@@ -2,7 +2,9 @@ package com.roastkoff.controlposter.ui.screen.addplaylist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.PlaylistRepository
+import com.roastkoff.controlposter.ui.screen.group.AddGroupUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +22,7 @@ sealed interface AddPlaylistUiState {
 @HiltViewModel
 class AddPlaylistViewModel @Inject constructor(
     private val playlistRepository: PlaylistRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow<AddPlaylistUiState>(AddPlaylistUiState.Idle)
     val uiState: StateFlow<AddPlaylistUiState> = _uiState.asStateFlow()
@@ -38,11 +40,16 @@ class AddPlaylistViewModel @Inject constructor(
                     defaultIntervalMs = formData.defaultIntervalMs
                 )
                 _uiState.value = AddPlaylistUiState.Success
+                onNavigationBack()
             } catch (e: Exception) {
                 _uiState.value = AddPlaylistUiState.Error(
                     message = e.message ?: "เกิดข้อผิดพลาดในการสร้าง Playlist"
                 )
             }
         }
+    }
+
+    fun resetState() {
+        _uiState.value = AddPlaylistUiState.Idle
     }
 }

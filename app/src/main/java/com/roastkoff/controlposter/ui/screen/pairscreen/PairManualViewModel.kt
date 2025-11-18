@@ -2,8 +2,10 @@ package com.roastkoff.controlposter.ui.screen.pairscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.DisplayRepository
 import com.roastkoff.controlposter.data.GroupRepository
+import com.roastkoff.controlposter.ui.screen.group.AddGroupUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +27,7 @@ data class PairManualUi(
 class PairManualViewModel @Inject constructor(
     private val groupRepository: GroupRepository,
     private val displayRepository: DisplayRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val _pairManualUi = MutableStateFlow(PairManualUi())
     val pairManualUi: StateFlow<PairManualUi> = _pairManualUi
@@ -72,10 +74,15 @@ class PairManualViewModel @Inject constructor(
                     code = cur.code.ifBlank { null }
                 )
             }.onSuccess {
-                _pairManualUi.value = _pairManualUi.value.copy(loading = false, done = true)
+                _pairManualUi.value = _pairManualUi.value.copy(loading = false)
+                onNavigationBack()
             }.onFailure { e ->
                 _pairManualUi.value = _pairManualUi.value.copy(loading = false, error = e.message ?: "บันทึกล้มเหลว")
             }
         }
+    }
+
+    fun resetState() {
+        _pairManualUi.value = PairManualUi()
     }
 }
