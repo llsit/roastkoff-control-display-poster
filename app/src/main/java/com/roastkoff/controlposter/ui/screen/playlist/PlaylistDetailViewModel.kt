@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roastkoff.controlposter.data.PlaylistData
 import com.roastkoff.controlposter.data.PlaylistRepository
+import com.roastkoff.controlposter.ui.screen.itemdetail.PlaylistItemUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ sealed interface PlaylistUiState {
     data object Loading : PlaylistUiState
     data class Success(val playlist: PlaylistData) : PlaylistUiState
     data class Error(val message: String) : PlaylistUiState
+    data object Deleted : PlaylistUiState
 }
 
 @HiltViewModel
@@ -35,6 +37,20 @@ class PlaylistDetailViewModel @Inject constructor(
             } catch (e: Exception) {
                 _playlistUiState.value = PlaylistUiState.Error(
                     message = e.message ?: "Unknown error"
+                )
+            }
+        }
+    }
+
+    fun deleteItem(playlistId: String, itemId: String) {
+        viewModelScope.launch {
+            _playlistUiState.value = PlaylistUiState.Loading
+            try {
+                playlistRepository.deletePlaylistItem(playlistId, itemId)
+                _playlistUiState.value = PlaylistUiState.Deleted
+            } catch (e: Exception) {
+                _playlistUiState.value = PlaylistUiState.Error(
+                    message = e.message ?: "ไม่สามารถลบ Item ได้"
                 )
             }
         }

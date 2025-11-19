@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -30,6 +31,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.roastkoff.controlposter.data.PlaylistItem
+import com.roastkoff.controlposter.ui.component.DeleteConfirmDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,12 +50,26 @@ fun PlaylistDetailScreen(
     playlistName: String = "playlist1",
     onNavigateBack: () -> Unit,
     onAddItem: (playlistId: String) -> Unit,
-    onEditItem: (itemId: String) -> Unit,
+    onClickItem: (playlistId: String, itemId: String) -> Unit,
     viewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
 
     val state by viewModel.playlistUiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { viewModel.loadPlaylistDetail(playlistId) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var itemId by remember { mutableStateOf("") }
+
+    DeleteConfirmDialog(
+        visible = showDeleteDialog,
+        itemName = playlistName,
+        onConfirm = {
+            showDeleteDialog = false
+            viewModel.deleteItem(playlistId, itemId)
+        },
+        onDismiss = {
+            showDeleteDialog = false
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -72,7 +91,7 @@ fun PlaylistDetailScreen(
         when (state) {
             is PlaylistUiState.Error -> {}
             PlaylistUiState.Loading -> {
-
+                CircularProgressIndicator()
             }
 
             is PlaylistUiState.Success -> {
@@ -112,12 +131,15 @@ fun PlaylistDetailScreen(
                         items(items.size) { index ->
                             PlaylistItemCard(
                                 item = items[index],
-                                onEdit = { onEditItem(items[index].id) }
+                                onClickItem = { onClickItem(playlistId, items[index].id) },
+                                onDelete = { itemId = it; showDeleteDialog = true }
                             )
                         }
                     }
                 }
             }
+
+            PlaylistUiState.Deleted -> {}
         }
     }
 }
@@ -125,10 +147,11 @@ fun PlaylistDetailScreen(
 @Composable
 private fun PlaylistItemCard(
     item: PlaylistItem,
-    onEdit: () -> Unit
+    onClickItem: () -> Unit,
+    onDelete: (String) -> Unit
 ) {
     ElevatedCard(
-        onClick = onEdit,
+        onClick = onClickItem,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -154,19 +177,19 @@ private fun PlaylistItemCard(
             }
 
             Text(
-                "name",
+                item.name,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f)
             )
 
-            Icon(
-                Icons.Outlined.Edit,
-                contentDescription = "Edit",
-                tint = MaterialTheme.colorScheme.primary
-            )
+//            Icon(
+//                Icons.Outlined.Edit,
+//                contentDescription = "Edit",
+//                tint = MaterialTheme.colorScheme.primary
+//            )
 
-            IconButton(onClick = { }) {
+            IconButton(onClick = { onDelete(item.id) }) {
                 Icon(
                     Icons.Outlined.Delete,
                     contentDescription = "Delete",

@@ -33,6 +33,9 @@ interface PlaylistRepository {
         mute: Boolean,
         mediaUri: Uri,
     )
+
+    fun getPlaylistItem(playlistId: String, itemId: String): Flow<PlaylistItem>
+    suspend fun deletePlaylistItem(playlistId: String, itemId: String)
 }
 
 class PlaylistRepositoryImpl @Inject constructor(
@@ -43,7 +46,6 @@ class PlaylistRepositoryImpl @Inject constructor(
 
     companion object {
         private const val COLLECTION_PLAYLISTS = "playlists"
-        private const val MAX_FILE_SIZE = 5 * 1024 * 1024L // 5 MB
     }
 
     override suspend fun createPlaylist(
@@ -84,17 +86,7 @@ class PlaylistRepositoryImpl @Inject constructor(
             .await()
 
         val itemsRaw = playlistDoc.get("items") as? List<Map<String, Any>> ?: emptyList()
-
-        val items = itemsRaw.map { itemMap ->
-            PlaylistItem(
-                id = itemMap["id"] as? String ?: "",
-                durationMs = (itemMap["durationMs"] as? Long)?.toInt() ?: 7000,
-                fit = itemMap["fit"] as? String ?: "cover",
-                mute = itemMap["mute"] as? Boolean ?: true,
-                src = itemMap["src"] as? String ?: "",
-                type = itemMap["type"] as? String ?: "image"
-            )
-        }
+        val items = itemsRaw.map { mapPlaylistItem(it) }
 
         val data = PlaylistData(
             tenantId = playlistDoc.getString("tenantId") ?: "",
@@ -126,21 +118,22 @@ class PlaylistRepositoryImpl @Inject constructor(
         }
 
         val fileName = "${UUID.randomUUID()}.$fileExtension"
-        val storageRef = storage.reference
-            .child("playlists")
-            .child(playlistId)
-            .child(fileName)
-
-        storageRef.putFile(mediaUri).await()
-
-        val downloadUrl = storageRef.downloadUrl.await().toString()
+//        val storageRef = storage.reference
+//            .child("playlists")
+//            .child(playlistId)
+//            .child(fileName)
+//
+//        storageRef.putFile(mediaUri).await()
+//
+//        val downloadUrl = storageRef.downloadUrl.await().toString()
 
         val newItem = PlaylistItem(
             id = "item_${System.currentTimeMillis()}",
             durationMs = durationMs,
+            name = itemName,
             fit = fit,
             mute = mute,
-            src = downloadUrl,
+            src = "downloadUrl",
             type = itemType
         )
 
@@ -154,6 +147,61 @@ class PlaylistRepositoryImpl @Inject constructor(
             )
             .await()
     }
+
+    override fun getPlaylistItem(
+        playlistId: String,
+        itemId: String
+    ): Flow<PlaylistItem> = flow {
+        val playlistDoc = firestore.collection(COLLECTION_PLAYLISTS)
+            .document(playlistId)
+            .get()
+            .await()
+
+        val itemsRaw = playlistDoc.get("items") as? List<Map<String, Any>> ?: emptyList()
+        val items = itemsRaw.map { mapPlaylistItem(it) }
+
+        val item = items.firstOrNull { it.id == itemId }
+            ?: throw NoSuchElementException("Playlist item $itemId not found in playlist $playlistId")
+
+        emit(item)
+    }
+
+    override suspend fun deletePlaylistItem(playlistId: String, itemId: String) {
+        val playlistRef = firestore.collection(COLLECTION_PLAYLISTS)
+            .document(playlistId)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(playlistRef)
+
+            val itemsRaw = snapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
+            val items = itemsRaw.map { mapPlaylistItem(it) }
+
+            val updatedItems = items.filterNot { it.id == itemId }
+
+            transaction.update(
+                playlistRef,
+                mapOf(
+                    "items" to updatedItems,
+                    "updatedAt" to FieldValue.serverTimestamp()
+                )
+            )
+
+            // return value of the transaction (เราไม่ใช้เลย return null)
+            null
+        }.await()
+    }
+}
+
+private fun mapPlaylistItem(itemMap: Map<String, Any>): PlaylistItem {
+    return PlaylistItem(
+        id = itemMap["id"] as? String ?: "",
+        durationMs = (itemMap["durationMs"] as? Long)?.toInt() ?: 7000,
+        name = itemMap["name"] as? String ?: "",
+        fit = itemMap["fit"] as? String ?: "cover",
+        mute = itemMap["mute"] as? Boolean ?: true,
+        src = itemMap["src"] as? String ?: "",
+        type = itemMap["type"] as? String ?: "image"
+    )
 }
 
 data class PlaylistData(
@@ -172,6 +220,7 @@ data class PlaylistData(
 data class PlaylistItem(
     val id: String = "",
     val durationMs: Int = 7000,
+    val name: String = "",
     val fit: String = "cover",
     val mute: Boolean = true,
     val src: String = "",

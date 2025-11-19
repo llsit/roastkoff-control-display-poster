@@ -54,7 +54,7 @@ fun DisplayDetailScreen(
     displayId: String,
     viewModel: DisplayDetailViewModel = hiltViewModel(),
     onClickBack: () -> Unit,
-    onTapPlaylist: (String) -> Unit,
+    onTapPlaylist: (playlistId: String, playlistName: String) -> Unit,
     onAddPlaylist: (groupId: String, displayId: String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -155,7 +155,7 @@ fun DisplayDetailScreen(
 private fun DisplayDetailContent(
     display: Display,
     playlists: List<Playlist>,
-    onTapPlaylist: (String) -> Unit
+    onTapPlaylist: (String, String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -182,7 +182,7 @@ private fun DisplayDetailContent(
             items(playlists.size) { index ->
                 PlaylistCard(
                     playlist = playlists[index],
-                    onClick = { onTapPlaylist(playlists[index].id) }
+                    onClick = { onTapPlaylist(playlists[index].id, playlists[index].name) }
                 )
             }
         }

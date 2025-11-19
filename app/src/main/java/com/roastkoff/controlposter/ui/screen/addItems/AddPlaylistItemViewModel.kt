@@ -40,9 +40,8 @@ class AddPlaylistItemViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                // Check file size
                 val fileSize = getFileSize(mediaUri)
-                if (fileSize > 5 * 1024 * 1024) { // 5 MB
+                if (fileSize > 5 * 1024 * 1024) {
                     _uiState.value = AddPlaylistItemUiState.Error(
                         "ไฟล์มีขนาดใหญ่เกิน 5 MB (${fileSize / 1024 / 1024} MB)"
                     )

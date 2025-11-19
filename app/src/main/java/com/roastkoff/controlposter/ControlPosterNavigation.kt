@@ -18,6 +18,7 @@ import com.roastkoff.controlposter.ui.screen.authen.AuthViewModel
 import com.roastkoff.controlposter.ui.screen.dashboard.DashboardScreen
 import com.roastkoff.controlposter.ui.screen.display.DisplayDetailScreen
 import com.roastkoff.controlposter.ui.screen.group.AddGroupScreen
+import com.roastkoff.controlposter.ui.screen.itemdetail.ItemDetailScreen
 import com.roastkoff.controlposter.ui.screen.login.LoginScreen
 import com.roastkoff.controlposter.ui.screen.pairscreen.PairManualScreen
 import com.roastkoff.controlposter.ui.screen.playlist.PlaylistDetailScreen
@@ -111,7 +112,14 @@ private fun MainNavigation(
                     DisplayDetailScreen(
                         displayId = key.displayId,
                         onClickBack = { backStack.removeLastOrNull() },
-                        onTapPlaylist = { backStack.add(MainRoute.Playlist(it)) },
+                        onTapPlaylist = { playlistId, playlistName ->
+                            backStack.add(
+                                MainRoute.Playlist(
+                                    playlistId,
+                                    playlistName
+                                )
+                            )
+                        },
                         onAddPlaylist = { groupId, displayId ->
                             backStack.add(MainRoute.AddPlaylist(groupId, displayId))
                         }
@@ -138,15 +146,31 @@ private fun MainNavigation(
                 is MainRoute.Playlist -> NavEntry(key) {
                     PlaylistDetailScreen(
                         playlistId = key.playlistId,
+                        playlistName = key.playlistName,
                         onNavigateBack = { backStack.removeLastOrNull() },
                         onAddItem = { backStack.add(MainRoute.AddItemPlaylist(it)) },
-                        onEditItem = {}
+                        onClickItem = { playlistId, itemId ->
+                            backStack.add(
+                                MainRoute.ItemPlaylistDetail(
+                                    playlistId,
+                                    itemId
+                                )
+                            )
+                        }
                     )
                 }
 
                 is MainRoute.AddItemPlaylist -> NavEntry(key) {
                     AddPlaylistItemScreen(
                         playlistId = key.playlistId,
+                        onNavigateBack = { backStack.removeLastOrNull() }
+                    )
+                }
+
+                is MainRoute.ItemPlaylistDetail -> NavEntry(key) {
+                    ItemDetailScreen(
+                        playlistId = key.playlistId,
+                        itemId = key.itemId,
                         onNavigateBack = { backStack.removeLastOrNull() }
                     )
                 }
@@ -169,6 +193,7 @@ sealed class MainRoute() {
     data object PairDisplay : MainRoute()
     data class Display(val displayId: String) : MainRoute()
     data class AddPlaylist(val groupId: String, val displayId: String) : MainRoute()
-    data class Playlist(val playlistId: String) : MainRoute()
+    data class Playlist(val playlistId: String, val playlistName: String) : MainRoute()
     data class AddItemPlaylist(val playlistId: String) : MainRoute()
+    data class ItemPlaylistDetail(val playlistId: String, val itemId: String) : MainRoute()
 }
