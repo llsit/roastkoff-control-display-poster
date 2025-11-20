@@ -4,23 +4,24 @@ import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.roastkoff.controlposter.common.ControlPreferences
 import com.roastkoff.controlposter.data.model.Display
 import com.roastkoff.controlposter.data.model.DisplayDto
 import com.roastkoff.controlposter.data.model.Playlist
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 interface DisplayRepository {
     suspend fun createDisplay(
-        tenantId: String,
-        groupId: String?,
+        groupId: String,
         name: String,
         location: String?,
-        code: String?
+        code: String
     ): String
 
     fun displaysByTenant(tenantId: String): Flow<List<Pair<String, DisplayDto>>>
@@ -30,42 +31,47 @@ interface DisplayRepository {
 }
 
 class DisplayRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val preferences: ControlPreferences
 ) : DisplayRepository {
 
     override suspend fun createDisplay(
-        tenantId: String,
-        groupId: String?,
+        groupId: String,
         name: String,
         location: String?,
-        code: String?
+        code: String
     ): String {
-        val ref = firestore.collection("displays").document()
+        val sessionRef = firestore.collection("pairingSessions").document(code)
+        val sessionSnap = sessionRef.get().await()
+        require(sessionSnap.exists()) { "ยังไม่มีโค้ดนี้ในระบบ" }
+        val status = sessionSnap.getString("status") ?: "pending"
+        if (status != "pending") {
+            throw IllegalStateException("โค้ดนี้ถูกใช้แล้วหรือหมดอายุแล้ว")
+        }
+        val displayRef = firestore.collection("displays").document()
+        val tenantId = preferences.tenantId.firstOrNull()
         val data = hashMapOf(
             "tenantId" to tenantId,
             "groupId" to groupId,
             "name" to name,
-            "location" to location,
+            "location" to location.orEmpty(),
             "status" to "offline",
             "activePlaylistId" to null,
             "createdAt" to FieldValue.serverTimestamp(),
             "updatedAt" to FieldValue.serverTimestamp()
         )
-        ref.set(data).await()
+        displayRef.set(data).await()
 
-        if (!code.isNullOrBlank()) {
-            firestore.collection("pairingLogs").document()
-                .set(
-                    mapOf(
-                        "displayId" to ref.id,
-                        "tenantId" to tenantId,
-                        "groupId" to groupId,
-                        "code" to code,
-                        "createdAt" to FieldValue.serverTimestamp()
-                    )
-                ).await()
-        }
-        return ref.id
+        sessionRef.update(
+            mapOf(
+                "displayId" to displayRef.id,
+                "tenantId" to tenantId,
+                "groupId" to groupId,
+                "status" to "claimed",
+                "updatedAt" to FieldValue.serverTimestamp()
+            )
+        ).await()
+        return displayRef.id
     }
 
     override fun displaysByTenant(tenantId: String): Flow<List<Pair<String, DisplayDto>>> =

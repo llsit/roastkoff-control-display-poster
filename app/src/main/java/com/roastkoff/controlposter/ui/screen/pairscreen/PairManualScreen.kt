@@ -40,9 +40,8 @@ import com.roastkoff.controlposter.common.UiEvent
 @Composable
 fun PairManualScreen(
     tenantId: String,
-    onDone: () -> Unit,
     viewModel: PairManualViewModel = hiltViewModel(),
-    onClickBack: () -> Unit,
+    onNavigateBack: () -> Unit,
     onAddGroup: () -> Unit
 ) {
     val ui by viewModel.pairManualUi.collectAsState()
@@ -54,7 +53,7 @@ fun PairManualScreen(
             viewModel.events.collect { event ->
                 when (event) {
                     is UiEvent.NavigateBack -> {
-                        onDone()
+                        onNavigateBack()
                         viewModel.resetState()
                     }
 
@@ -72,7 +71,10 @@ fun PairManualScreen(
                     Icon(
                         Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = "",
-                        modifier = Modifier.clickable(onClick = onClickBack)
+                        modifier = Modifier.clickable(onClick = {
+                            onNavigateBack()
+                            viewModel.resetState()
+                        })
                     )
                 })
         }
@@ -100,9 +102,10 @@ fun PairManualScreen(
             OutlinedTextField(
                 value = ui.code,
                 onValueChange = viewModel::setCode,
-                label = { Text("โค้ด (ไม่บังคับ)") },
+                label = { Text("โค้ดหน้าจอ") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                placeholder = { Text("เช่น 297862") }
             )
 
             var expanded by remember { mutableStateOf(false) }
@@ -146,8 +149,11 @@ fun PairManualScreen(
             if (ui.error != null) Text(ui.error!!, color = MaterialTheme.colorScheme.error)
 
             Button(
-                onClick = { viewModel.submit(tenantId) },
-                enabled = !ui.loading && ui.displayName.isNotBlank(),
+                onClick = { viewModel.submit() },
+                enabled = !ui.loading &&
+                        ui.displayName.isNotBlank() &&
+                        ui.groupId.isNotBlank() &&
+                        ui.code.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (ui.loading) CircularProgressIndicator(Modifier.size(18.dp))

@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.PlaylistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -15,7 +16,7 @@ import javax.inject.Inject
 
 sealed interface AddPlaylistItemUiState {
     data object Idle : AddPlaylistItemUiState
-    data object Uploading : AddPlaylistItemUiState  // เอา progress ออก
+    data object Uploading : AddPlaylistItemUiState
     data object Success : AddPlaylistItemUiState
     data class Error(val message: String) : AddPlaylistItemUiState
 }
@@ -24,7 +25,7 @@ sealed interface AddPlaylistItemUiState {
 class AddPlaylistItemViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val playlistRepository: PlaylistRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow<AddPlaylistItemUiState>(AddPlaylistItemUiState.Idle)
     val uiState: StateFlow<AddPlaylistItemUiState> = _uiState.asStateFlow()

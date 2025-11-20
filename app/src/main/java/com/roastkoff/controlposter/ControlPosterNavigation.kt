@@ -129,8 +129,7 @@ private fun MainNavigation(
                 is MainRoute.PairDisplay -> NavEntry(key) {
                     PairManualScreen(
                         tenantId = currentTenantId,
-                        onDone = { backStack.removeLastOrNull() },
-                        onClickBack = { backStack.removeLastOrNull() },
+                        onNavigateBack = { backStack.removeLastOrNull() },
                         onAddGroup = { backStack.add(MainRoute.AddGroup) }
                     )
                 }

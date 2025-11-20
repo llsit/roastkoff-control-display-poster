@@ -1,11 +1,9 @@
 package com.roastkoff.controlposter.ui.screen.pairscreen
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.DisplayRepository
 import com.roastkoff.controlposter.data.GroupRepository
-import com.roastkoff.controlposter.ui.screen.group.AddGroupUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,8 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 data class PairManualUi(
-    val groups: List<Pair<String, String>> = emptyList(), // (id,name)
-    val groupId: String? = null,
+    val groups: List<Pair<String, String>> = emptyList(),
+    val groupId: String = "",
     val displayName: String = "",
     val location: String = "",
     val code: String = "",
@@ -42,7 +40,7 @@ class PairManualViewModel @Inject constructor(
         }
     }
 
-    fun setGroup(id: String?) {
+    fun setGroup(id: String) {
         _pairManualUi.value = _pairManualUi.value.copy(groupId = id)
     }
 
@@ -58,26 +56,35 @@ class PairManualViewModel @Inject constructor(
         _pairManualUi.value = _pairManualUi.value.copy(code = s)
     }
 
-    fun submit(tenantId: String) {
+    fun submit() {
         val cur = _pairManualUi.value
         if (cur.displayName.isBlank()) {
-            _pairManualUi.value = cur.copy(error = "กรุณากรอกชื่อจอ"); return
+            _pairManualUi.value = cur.copy(error = "กรุณากรอกชื่อจอ")
+            return
+        }
+        if (cur.groupId.isBlank()) {
+            _pairManualUi.value = cur.copy(error = "กรุณาเลือกกลุ่ม")
+            return
+        }
+        if (cur.code.isBlank()) {
+            _pairManualUi.value = cur.copy(error = "กรุณาใส่โค้ดหน้าจอ")
+            return
         }
         viewModelScope.launch {
             _pairManualUi.value = cur.copy(loading = true, error = null)
             runCatching {
                 displayRepository.createDisplay(
-                    tenantId = tenantId,
                     groupId = cur.groupId,
                     name = cur.displayName.trim(),
                     location = cur.location.ifBlank { null },
-                    code = cur.code.ifBlank { null }
+                    code = cur.code.trim()
                 )
             }.onSuccess {
                 _pairManualUi.value = _pairManualUi.value.copy(loading = false)
                 onNavigationBack()
             }.onFailure { e ->
-                _pairManualUi.value = _pairManualUi.value.copy(loading = false, error = e.message ?: "บันทึกล้มเหลว")
+                _pairManualUi.value =
+                    _pairManualUi.value.copy(loading = false, error = e.message ?: "บันทึกล้มเหลว")
             }
         }
     }
