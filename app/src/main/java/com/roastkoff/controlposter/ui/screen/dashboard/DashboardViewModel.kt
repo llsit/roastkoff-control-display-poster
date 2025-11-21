@@ -7,6 +7,7 @@ import com.roastkoff.controlposter.data.DashRepository
 import com.roastkoff.controlposter.data.model.DashboardStats
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +28,7 @@ class DashboardViewModel @Inject constructor(
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     fun loadStats(tenantId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _uiState.value = DashboardUiState.Loading
 
             dashRepository.branchesOfTenant(tenantId).collect { stats ->

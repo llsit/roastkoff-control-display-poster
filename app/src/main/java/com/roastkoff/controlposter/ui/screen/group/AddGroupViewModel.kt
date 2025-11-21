@@ -6,6 +6,7 @@ import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.GroupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +36,7 @@ class AddGroupViewModel @Inject constructor(
             _addGroupUi.value = current.copy(error = "Branch name required")
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _addGroupUi.value = current.copy(loading = true, error = null)
             runCatching {
                 repository.createGroup(tenantId, current.name.trim())

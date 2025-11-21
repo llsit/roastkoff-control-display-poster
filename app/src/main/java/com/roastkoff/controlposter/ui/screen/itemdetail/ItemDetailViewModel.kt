@@ -5,6 +5,7 @@ import com.roastkoff.controlposter.common.BaseViewModel
 import com.roastkoff.controlposter.data.PlaylistItem
 import com.roastkoff.controlposter.data.PlaylistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +30,7 @@ class ItemDetailViewModel @Inject constructor(
     val uiState: StateFlow<PlaylistItemUiState> = _uiState.asStateFlow()
 
     fun loadItem(playlistId: String, itemId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _uiState.value = PlaylistItemUiState.Loading
             try {
                 playlistRepository.getPlaylistItem(playlistId, itemId).collect { item ->
@@ -44,7 +45,7 @@ class ItemDetailViewModel @Inject constructor(
     }
 
     fun deleteItem(playlistId: String, itemId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _uiState.value = PlaylistItemUiState.Deleting
             try {
                 playlistRepository.deletePlaylistItem(playlistId, itemId)

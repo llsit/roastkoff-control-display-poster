@@ -8,5 +8,6 @@ data class Playlist(
     val shuffle: Boolean = false,
     val defaultIntervalMs: Int = 5000,
     val groupId: String? = null,
-    val tenantId: String = ""
+    val tenantId: String = "",
+    val isActive: Boolean = false
 )

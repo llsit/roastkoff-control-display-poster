@@ -28,6 +28,8 @@ interface DisplayRepository {
     fun displaysByGroup(tenantId: String, groupId: String?): Flow<List<Pair<String, DisplayDto>>>
 
     fun getDisplayWithPlaylists(displayId: String): Flow<Pair<Display, List<Playlist>>>
+
+    suspend fun setActivePlaylist(displayId: String, playlistId: String)
 }
 
 class DisplayRepositoryImpl @Inject constructor(
@@ -157,12 +159,12 @@ class DisplayRepositoryImpl @Inject constructor(
                         Playlist(
                             id = doc.id,
                             name = doc.getString("name") ?: "",
-                            items = doc.get("items") as? List<String> ?: emptyList(),
                             loop = doc.getBoolean("loop") ?: false,
                             shuffle = doc.getBoolean("shuffle") ?: false,
                             defaultIntervalMs = doc.getLong("defaultIntervalMs")?.toInt() ?: 5000,
                             groupId = doc.getString("groupId"),
-                            tenantId = doc.getString("tenantId") ?: ""
+                            tenantId = doc.getString("tenantId") ?: "",
+                            isActive = doc.getBoolean("active") ?: false
                         )
                     } catch (e: Exception) {
                         Log.e("DisplayRepo", "Error parsing playlist ${doc.id}", e)
@@ -175,4 +177,16 @@ class DisplayRepositoryImpl @Inject constructor(
 
             emit(display to playlists)
         }
+
+    override suspend fun setActivePlaylist(displayId: String, playlistId: String) {
+        firestore.collection("displays")
+            .document(displayId)
+            .update(
+                mapOf(
+                    "activePlaylistId" to playlistId,
+                    "updatedAt" to FieldValue.serverTimestamp()
+                )
+            )
+            .await()
+    }
 }

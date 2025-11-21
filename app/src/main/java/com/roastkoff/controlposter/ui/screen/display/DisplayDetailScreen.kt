@@ -34,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -143,7 +144,15 @@ fun DisplayDetailScreen(
                     DisplayDetailContent(
                         display = state.display,
                         playlists = state.playlists,
-                        onTapPlaylist = onTapPlaylist
+                        onTapPlaylist = onTapPlaylist,
+                        onActiveChange = { isActive, playlistId ->
+                            viewModel.setActivePlaylist(
+                                playlistId,
+                                state.display.groupId.orEmpty(),
+                                displayId,
+                                isActive
+                            )
+                        }
                     )
                 }
             }
@@ -155,7 +164,8 @@ fun DisplayDetailScreen(
 private fun DisplayDetailContent(
     display: Display,
     playlists: List<Playlist>,
-    onTapPlaylist: (String, String) -> Unit
+    onTapPlaylist: (String, String) -> Unit,
+    onActiveChange: (Boolean, String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -182,7 +192,8 @@ private fun DisplayDetailContent(
             items(playlists.size) { index ->
                 PlaylistCard(
                     playlist = playlists[index],
-                    onClick = { onTapPlaylist(playlists[index].id, playlists[index].name) }
+                    onClick = { onTapPlaylist(playlists[index].id, playlists[index].name) },
+                    onActiveChange = onActiveChange
                 )
             }
         }
@@ -298,7 +309,8 @@ private fun DisplayInfoCard(
 @Composable
 private fun PlaylistCard(
     playlist: Playlist,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onActiveChange: (Boolean, String) -> Unit
 ) {
     ElevatedCard(
         onClick = onClick,
@@ -396,6 +408,13 @@ private fun PlaylistCard(
                     }
                 }
             }
+
+            Switch(
+                checked = playlist.isActive,
+                onCheckedChange = { isChecked ->
+                    onActiveChange(isChecked, playlist.id)
+                }
+            )
 
             Icon(
                 Icons.Outlined.ChevronRight,

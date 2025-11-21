@@ -6,6 +6,7 @@ import com.roastkoff.controlposter.data.DisplayRepository
 import com.roastkoff.controlposter.data.GroupRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ class PairManualViewModel @Inject constructor(
     val pairManualUi: StateFlow<PairManualUi> = _pairManualUi
 
     fun loadGroups(tenantId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             groupRepository.groupsOfTenant(tenantId).collect { list ->
                 _pairManualUi.value = _pairManualUi.value.copy(
                     groups = list.map { it.first to it.second.name }
@@ -70,7 +71,7 @@ class PairManualViewModel @Inject constructor(
             _pairManualUi.value = cur.copy(error = "กรุณาใส่โค้ดหน้าจอ")
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _pairManualUi.value = cur.copy(loading = true, error = null)
             runCatching {
                 displayRepository.createDisplay(

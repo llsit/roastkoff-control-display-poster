@@ -36,6 +36,13 @@ interface PlaylistRepository {
 
     fun getPlaylistItem(playlistId: String, itemId: String): Flow<PlaylistItem>
     suspend fun deletePlaylistItem(playlistId: String, itemId: String)
+
+    suspend fun updateActivePlaylist(
+        playlistId: String,
+        groupId: String,
+        displayId: String,
+        isActive: Boolean
+    )
 }
 
 class PlaylistRepositoryImpl @Inject constructor(
@@ -70,6 +77,7 @@ class PlaylistRepositoryImpl @Inject constructor(
             items = emptyList(),
             createdAt = FieldValue.serverTimestamp(),
             updatedAt = FieldValue.serverTimestamp(),
+            isActive = false
         )
 
         val docRef = firestore.collection(COLLECTION_PLAYLISTS)
@@ -96,7 +104,8 @@ class PlaylistRepositoryImpl @Inject constructor(
             loop = playlistDoc.getBoolean("loop") ?: false,
             shuffle = playlistDoc.getBoolean("shuffle") ?: false,
             defaultIntervalMs = playlistDoc.getLong("defaultIntervalMs")?.toInt() ?: 0,
-            items = items
+            items = items,
+            isActive = playlistDoc.getBoolean("active") ?: false
         )
 
         emit(data)
@@ -186,9 +195,36 @@ class PlaylistRepositoryImpl @Inject constructor(
                 )
             )
 
-            // return value of the transaction (เราไม่ใช้เลย return null)
             null
         }.await()
+    }
+
+    override suspend fun updateActivePlaylist(
+        playlistId: String,
+        groupId: String,
+        displayId: String,
+        isActive: Boolean
+    ) {
+        val tenantId = prefs.tenantId.first()
+            ?: throw IllegalStateException("Tenant ID not found")
+        val ref = firestore.collection("playlists")
+
+        if (!isActive) {
+            ref.document(playlistId).update("active", false).await()
+            return
+        }
+        val activeSnapshot = ref
+            .whereEqualTo("tenantId", tenantId)
+            .whereEqualTo("displayId", displayId)
+            .whereEqualTo("groupId", groupId)
+            .whereEqualTo("active", true)
+            .get()
+            .await()
+        activeSnapshot.documents.forEach { doc ->
+            ref.document(doc.id).update("active", false).await()
+        }
+
+        ref.document(playlistId).update("active", true).await()
     }
 }
 
@@ -214,7 +250,8 @@ data class PlaylistData(
     val defaultIntervalMs: Int = 0,
     val items: List<PlaylistItem> = emptyList(),
     val createdAt: FieldValue? = null,
-    val updatedAt: FieldValue? = null
+    val updatedAt: FieldValue? = null,
+    val isActive: Boolean = false
 )
 
 data class PlaylistItem(

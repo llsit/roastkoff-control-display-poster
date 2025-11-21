@@ -6,6 +6,7 @@ import com.roastkoff.controlposter.data.AuthRepository
 import com.roastkoff.controlposter.data.UserRepository
 import com.roastkoff.controlposter.data.model.AuthState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +27,7 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun observeAuthState() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             authRepository.observeAuthState().collect { uid ->
                 if (uid == null) {
                     _authState.value = AuthState.Unauthenticated
